@@ -46,26 +46,7 @@ function qrp = qr_przesuniecia(A)
     qrp = 0;
 end
 %% 
-% algorytm Grama-Schmidta 2
-
-function [Q R] = gram_schmidt2(A)
-     rozmiar = size(A);
-     Q = zeros(rozmiar);
-     R = eye(rozmiar);
-     % 1
-     Q(:,1) = A(:,1);
-     % 2
-     R(1,2) = mydot(Q(:,1),A(:,2))/mydot(Q(:,1),Q(:,1));
-     Q(:,2) = A(:,2) - R(1,2)*Q(:,1);
-     % 3
-     R(1,3) = mydot(Q(:,1),A(:,3))/mydot(Q(:,1),Q(:,1));
-     R(2,3) = mydot(Q(:,2),A(:,3))/mydot(Q(:,2),Q(:,2));
-     Q(:,3) = A(:,3) - R(1,3)*Q(:,1) - R(2,3)*Q(:,2);
-%      for i = 1:rozmiar
-%          B[:,1]
-%      end
-end
-%% *algorytm Grama-Schmidta*
+% algorytm Grama-Schmidta
 
 function [Q R] = gram_schmidt(A)
      rozmiar = size(A);
