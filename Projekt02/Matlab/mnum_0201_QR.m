@@ -11,9 +11,9 @@ clear;
 % end
 A = [1 1 9;2 -1 0; -2 4 0];
 A = macierz_symetryczna(5);
-[q r] = qr(A)
-[Q R] = gram_schmidt(A)
-orth(A)
+[Q R] = qr_rozklad(A)
+eig(A)
+qr_bezprzesuniec(A)
 %% 
 % wyswietlenie bledow
 
@@ -23,21 +23,11 @@ orth(A)
 % 
 % algorytm obliczania wartosci wlasnych metoda QR bez przesuniec
 
-function qrb = qr_bezprzesuniec(A)
-     rozmiar = size(A);
-     Q = zeros(rozmiar);
-     % 1
-     Q(:,1) = A(:,1);
-     % 2
-     x = Q(:,1).*A(:,2)/(Q(:,1).*Q(:,1))
-     Q(:,2) = A(:,2) - x(:,2).*Q(:,1);
-     % 3
-     x = x + Q(:,2)/(Q(:,2).*Q(:,2));
-     Q(:,3) = A(:,3) - x(:,2).*A(:,3).*Q(:,1) - x(:,3).*A(:,3).*Q(:,2);
-%      for i = 1:rozmiar
-%          B[:,1]
-%      end
-    qrb = Q;
+function A = qr_bezprzesuniec(A)
+    while tolerancja(A) > 0.00001
+        [Q R] = qr_rozklad(A);
+        A = R * Q;
+    end
 end
 %% 
 % algorytm obliczania wartosci wlasnych metoda QR z przesunieciami
@@ -46,9 +36,9 @@ function qrp = qr_przesuniecia(A)
     qrp = 0;
 end
 %% 
-% algorytm Grama-Schmidta
+% rozklad QR
 
-function [Q R] = gram_schmidt(A)
+function [Q R] = qr_rozklad(A)
      rozmiar = size(A);
      Q = zeros(rozmiar);
      R = eye(rozmiar);
@@ -76,6 +66,22 @@ function md = mydot(A,B)
     md = 0;
     for i = 1:rozmiar
         md = md + A(i)*B(i);
+    end
+end
+%% 
+% sprawdzenie tolerancji
+
+function tol = tolerancja(A)
+    rozmiar = size(A);
+    A = abs(A)
+    tol = 0;
+    for i = 1:rozmiar
+        if max(A(i,i+1:end)) > tol
+            tol = max(A(i,i+1:end))
+        end
+        if max(A(i,1:i-1)) > tol
+            tol = max(A(i,1:i-1))
+        end
     end
 end
 %% 
