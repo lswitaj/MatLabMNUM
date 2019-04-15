@@ -10,8 +10,8 @@ clear;
 %     end
 % end
 A = [1 1 9;2 -1 0; -2 4 0];
-%[q r] = qr(A)
-[Q R] = gram_schmidt2(A)
+A = macierz_symetryczna(5);
+[q r] = qr(A)
 [Q R] = gram_schmidt(A)
 orth(A)
 %% 
@@ -71,24 +71,21 @@ function [Q R] = gram_schmidt(A)
      rozmiar = size(A);
      Q = zeros(rozmiar);
      R = eye(rozmiar);
-     
-%      % 1
-%      Q(:,1) = A(:,1);
-%      % 2
-%      R(1,2) = mydot(Q(:,1),A(:,2))/mydot(Q(:,1),Q(:,1));
-%      Q(:,2) = A(:,2) - R(1,2)*Q(:,1);
-%      % 3
-%      R(1,3) = mydot(Q(:,1),A(:,3))/mydot(Q(:,1),Q(:,1));
-%      R(2,3) = mydot(Q(:,2),A(:,3))/mydot(Q(:,2),Q(:,2));
-%      Q(:,3) = A(:,3) - R(1,3)*Q(:,1) - R(2,3)*Q(:,2);
-
+    %Gram-Schmidt
      for i = 1:rozmiar
          Q(:,i) = A(:,i);
-         for j = 1:(i-1)             
+         for j = 1:(i-1)
              R(j,i) = mydot(Q(:,j),A(:,i))/mydot(Q(:,j),Q(:,j));
              Q(:,i) = Q(:,i) - R(j,i)*Q(:,j);
          end
      end
+    %normalizacja
+     N = zeros(rozmiar);
+     for i = 1:rozmiar
+         N(i,i) = norm(Q(:,i));
+         Q(:,i) = Q(:,i)/N(i,i);
+     end
+     R = N*R;
 end
 %% 
 % autorska implementacja matlabowej funkcji dot()
