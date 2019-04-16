@@ -9,12 +9,11 @@ clear;
 %         macierz_niesymetryczna(rozmiar);
 %     end
 % end
-%A = [1 1 9;2 -1 0; -2 4 0];
-%A = [1 1;2 -1; -2 4];
+A = [1 1;2 -1; -2 4];
 %A = [1 1 2; -1 -2 4];
-A = macierz_symetryczna(5);
-    
-[q r] = qr_rozklad_niekwadrat(A)
+A = macierz_niesymetryczna(5);
+A
+[q r] = qr_rozklad(A)
 [Q R] = qr(A)
 %eig(A)
 %qr_bezprzesuniec(A)
@@ -25,30 +24,17 @@ A = macierz_symetryczna(5);
 %% 
 % *funkcje pomocnicze*
 % 
-% algorytm obliczania wartosci wlasnych metoda QR bez przesuniec
+% rozklad QR dla macierzy niekwadratowych
 
-function A = qr_bezprzesuniec(A)
-    while tolerancja(A) > 0.00001
-        [Q R] = qr_rozklad(A);
-        A = R * Q;
-    end
-    A = wektor(A);
-end
-%% 
-% algorytm obliczania wartosci wlasnych metoda QR z przesunieciami
-
-function qrp = qr_przesuniecia(A)
-    qrp = 0;
-end
-%% rozklad QR dla macierzy niekwadratowych
-
-function [Q R] = qr_rozklad_niekwadrat(A)
+function [Q R] = qr_rozklad(A)
      [r_wiersze r_kolumny] = size(A);
      Q = zeros(r_wiersze);
      if r_wiersze > r_kolumny
         R = eye(r_wiersze);
+        Q = eye(r_wiersze);
      else
         R = eye(r_kolumny);
+        Q = eye(r_wiersze);
      end
     %Gram-Schmidt
      for i = 1:r_kolumny
@@ -73,28 +59,22 @@ function [Q R] = qr_rozklad_niekwadrat(A)
         R = R(1:r_wiersze,1:r_wiersze);
      end
 end
-%% 
-% rozklad QR dla macierzy kwadratowych
 
-function [Q R] = qr_rozklad(A)
-     rozmiar = size(A);
-     Q = zeros(rozmiar);
-     R = eye(rozmiar);
-    %Gram-Schmidt
-     for i = 1:rozmiar
-         Q(:,i) = A(:,i);
-         for j = 1:(i-1)
-             R(j,i) = mydot(Q(:,j),A(:,i))/mydot(Q(:,j),Q(:,j));
-             Q(:,i) = Q(:,i) - R(j,i)*Q(:,j);
-         end
-     end
-    %normalizacja
-     N = zeros(rozmiar);
-     for i = 1:rozmiar
-         N(i,i) = norm(Q(:,i));
-         Q(:,i) = Q(:,i)/N(i,i);
-     end
-     R = N*R;
+%% 
+% algorytm obliczania wartosci wlasnych metoda QR bez przesuniec
+
+function A = qr_bezprzesuniec(A)
+    while tolerancja(A) > 0.00001
+        [Q R] = qr_rozklad(A);
+        A = R * Q;
+    end
+    A = wektor(A);
+end
+%% 
+%  algorytm obliczania wartosci wlasnych metoda QR z przesunieciami
+
+function qrp = qr_przesuniecia(A)
+    qrp = 0;
 end
 %% 
 % autorska implementacja matlabowej funkcji dot()
@@ -144,7 +124,10 @@ end
 function mac_nsym = macierz_niesymetryczna(rozmiar)
     mac_nsym = randi([0 100],rozmiar,rozmiar);
 end
+
 %% 
+% 
+% 
 % norma residuum
 
 function nr = norma_residuum(wspolczynniki, x, rozw)

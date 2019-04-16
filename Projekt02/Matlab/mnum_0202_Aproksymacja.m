@@ -1,43 +1,4 @@
 %% 
-% aproksymacja ? czy ok?
-% 
-% <https://www.wolframalpha.com/input/?i=-0.09-0.8*x-0.65*x%5E2%2B0.13*x%5E3 
-% https://www.wolframalpha.com/input/?i=-0.09-0.8*x-0.65*x%5E2%2B0.13*x%5E3>
-% 
-% raczej nie:
-% 
-% <https://mycurvefit.com/ https://mycurvefit.com/>
-% 
-%          -5               -5.5        
-% 
-%          -4               -3.88       
-% 
-%          -3               -1.97       
-% 
-%          -2               -1.666      
-% 
-%          -1               -0.0764     
-% 
-%           0               -0.397      
-% 
-%           1               -1          
-% 
-%           2               -4.55       
-% 
-%           3              -11.5        
-% 
-%           4              -21.65       
-% 
-%           5              -34.45       
-% 
-% 
-% 
-% trzeci stopien^
-% 
-% rysowanie funkcji -> ok
-% 
-% 
-% 
 % program
 
 clc;
@@ -45,11 +6,14 @@ clear;
 
 dane = [-5 -5.4606;-4 -3.8804;-3 -1.9699;-2 -1.6666;-1 -0.0764;0 -0.3971;1 -1.0303;2 -4.5483;3 -11.528;4 -21.6417;5 -34.4458];
 
-funkcja = uklad_rownan_normalnych(dane, 10);
-
+funkcja = uklad_rownan_normalnych(dane, 10)
 x = linspace(-5,5,100);
 y = fun(funkcja, x);
-plot(dane(:,1),dane(:,2),'bo', x, y, 'r')
+
+funkcja2 = uklad_qr(dane, 10)
+y2 = fun(funkcja2, x);
+
+plot(dane(:,1),dane(:,2),'bo', x, y, 'r', x, y2, 'g--')
 %A
 %% 
 % wyswietlenie bledow
@@ -62,16 +26,9 @@ plot(dane(:,1),dane(:,2),'bo', x, y, 'r')
 
 function wspolczynniki = uklad_rownan_normalnych(dane, st_wielomianu)
    % wyznaczanie macierzy Grama - <przeksztalcenie_i,przeksztalcenie_j>
-    st_wielomianu = st_wielomianu + 1;
-    macierz_Grama = zeros(st_wielomianu);
     [r_wiersze, r_kolumny] = size(dane);
-    for i = 1:st_wielomianu
-        for j = 1:st_wielomianu
-            for k = 1:r_wiersze
-                macierz_Grama(i,j) = macierz_Grama(i,j) + (dane(k,1))^(i+j-2);
-            end
-        end
-    end
+    st_wielomianu = st_wielomianu + 1;
+    macierz_Grama = wyzn_macierz_Grama(dane, st_wielomianu);
     
    % wektor prawej strony
     prawa_strona = zeros(st_wielomianu);
@@ -82,9 +39,48 @@ function wspolczynniki = uklad_rownan_normalnych(dane, st_wielomianu)
         end
     end
     
-    wspolczynniki = macierz_Grama\ prawa_strona;
+    wspolczynniki = macierz_Grama\prawa_strona;
 end
 %% 
+% uklad wynikajacy z rozkladu QR
+
+function wspolczynniki = uklad_qr(dane, st_wielomianu)
+   % wyznaczanie macierzy Grama - <przeksztalcenie_i,przeksztalcenie_j>
+    [r_wiersze, r_kolumny] = size(dane);
+    st_wielomianu = st_wielomianu + 1;
+    macierz_Grama = wyzn_macierz_Grama(dane, st_wielomianu);
+    
+   % wektor prawej strony
+    prawa_strona = zeros(st_wielomianu);
+    prawa_strona = prawa_strona(:,1);
+    for i = 1:st_wielomianu
+        for k = 1:r_wiersze
+            prawa_strona(i) = prawa_strona(i) + (dane(k,1))^(i-1)*dane(k,2);
+        end
+    end
+    
+    [Q R] = qr_rozklad(macierz_Grama);
+    wspolczynniki = R\Q'*prawa_strona;
+end
+
+%% 
+% wyznaczenie macierzy Grama
+
+function macierz_Grama = wyzn_macierz_Grama(dane, st_wielomianu)
+   % wyznaczanie macierzy Grama - <przeksztalcenie_i,przeksztalcenie_j>
+    macierz_Grama = zeros(st_wielomianu);
+    [r_wiersze, r_kolumny] = size(dane);
+    for i = 1:st_wielomianu
+        for j = 1:st_wielomianu
+            for k = 1:r_wiersze
+                macierz_Grama(i,j) = macierz_Grama(i,j) + (dane(k,1))^(i+j-2);
+            end
+        end
+    end
+end
+%% 
+% 
+% 
 % wyznaczenie wyjsc dla podanych x-ow i zadanej funkcji
 
 function y = fun(funkcja, x)
@@ -99,25 +95,9 @@ function y = fun(funkcja, x)
     end
 end
 %% 
-% algorytm obliczania wartosci wlasnych metoda QR bez przesuniec
+% rozklad QR
 
-function A = qr_bezprzesuniec(A)
-    while tolerancja(A) > 0.00001
-        [Q R] = qr_rozklad(A);
-        A = R * Q;
-    end
-    A = wektor(A);
-end
-%% 
-% algorytm obliczania wartosci wlasnych metoda QR z przesunieciami
-
-function qrp = qr_przesuniecia(A)
-    qrp = 0;
-end
-%% 
-% rozklad QR dla macierzy niekwadratowych
-
-function [Q R] = qr_rozklad_niekwadrat(A)
+function [Q R] = qr_rozklad(A)
      [r_wiersze r_kolumny] = size(A);
      Q = zeros(r_wiersze);
      if r_wiersze > r_kolumny
@@ -205,3 +185,38 @@ function nr = norma_residuum(wspolczynniki, x, rozw)
     residuum = wspolczynniki*x - rozw;
     nr = norm(residuum);
 end
+%% 
+% 
+% 
+% <https://www.wolframalpha.com/input/?i=-0.09-0.8*x-0.65*x%5E2%2B0.13*x%5E3 
+% https://www.wolframalpha.com/input/?i=-0.09-0.8*x-0.65*x%5E2%2B0.13*x%5E3>
+% 
+% <https://mycurvefit.com/ https://mycurvefit.com/>
+% 
+%          -5               -5.5        
+% 
+%          -4               -3.88       
+% 
+%          -3               -1.97       
+% 
+%          -2               -1.666      
+% 
+%          -1               -0.0764     
+% 
+%           0               -0.397      
+% 
+%           1               -1          
+% 
+%           2               -4.55       
+% 
+%           3              -11.5        
+% 
+%           4              -21.65       
+% 
+%           5              -34.45       
+% 
+% 
+% 
+% trzeci stopien^
+% 
+% rysowanie funkcji -> ok
