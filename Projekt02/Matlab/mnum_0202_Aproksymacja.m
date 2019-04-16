@@ -1,4 +1,43 @@
 %% 
+% aproksymacja ? czy ok?
+% 
+% <https://www.wolframalpha.com/input/?i=-0.09-0.8*x-0.65*x%5E2%2B0.13*x%5E3 
+% https://www.wolframalpha.com/input/?i=-0.09-0.8*x-0.65*x%5E2%2B0.13*x%5E3>
+% 
+% raczej nie:
+% 
+% <https://mycurvefit.com/ https://mycurvefit.com/>
+% 
+%          -5               -5.5        
+% 
+%          -4               -3.88       
+% 
+%          -3               -1.97       
+% 
+%          -2               -1.666      
+% 
+%          -1               -0.0764     
+% 
+%           0               -0.397      
+% 
+%           1               -1          
+% 
+%           2               -4.55       
+% 
+%           3              -11.5        
+% 
+%           4              -21.65       
+% 
+%           5              -34.45       
+% 
+% 
+% 
+% trzeci stopien^
+% 
+% rysowanie funkcji -> ok
+% 
+% 
+% 
 % program
 
 clc;
@@ -6,11 +45,11 @@ clear;
 
 dane = [-5 -5.4606;-4 -3.8804;-3 -1.9699;-2 -1.6666;-1 -0.0764;0 -0.3971;1 -1.0303;2 -4.5483;3 -11.528;4 -21.6417;5 -34.4458];
 
-funkcja = uklad_rownan_normalnych(dane, 1);
+funkcja = uklad_rownan_normalnych(dane, 10);
 
-x = linspace(-5,5, 100);
+x = linspace(-5,5,100);
 y = fun(funkcja, x);
-plot(dane(:,1),dane(:,2),'bo', x, y, 'r-')
+plot(dane(:,1),dane(:,2),'bo', x, y, 'r')
 %A
 %% 
 % wyswietlenie bledow
@@ -43,20 +82,19 @@ function wspolczynniki = uklad_rownan_normalnych(dane, st_wielomianu)
         end
     end
     
-    wspolczynniki = gauss(macierz_Grama, prawa_strona);
+    wspolczynniki = macierz_Grama\ prawa_strona;
 end
 %% 
 % wyznaczenie wyjsc dla podanych x-ow i zadanej funkcji
 
 function y = fun(funkcja, x)
-    rozmiar_x = size(x);
+    [temp rozmiar_x] = size(x);
     st_wielomianu = size(funkcja);
     y = zeros(rozmiar_x);
     y = y(:,1);
-    
     for i = 1:rozmiar_x
         for j = 1:st_wielomianu
-            y(i) = y(i) + funkcja(i)*(x(i))^(j-1);
+            y(i,1) = y(i,1) + funkcja(j,1)*(x(1,i))^(j-1);
         end
     end
 end
@@ -166,43 +204,4 @@ end
 function nr = norma_residuum(wspolczynniki, x, rozw)
     residuum = wspolczynniki*x - rozw;
     nr = norm(residuum);
-end
-%% 
-% algorytm Gaussa z projektu1
-
-function rozw = gauss(wspolczynniki, rozw)
-    rozmiar = size(rozw);
-    pierwotne_b = rozw;
-    pierwotne_wspolczynniki = wspolczynniki;
-    for i = 1:(rozmiar-1)
-        podmacierz = wspolczynniki(i:rozmiar, i:rozmiar);
-        [el_glowny, ind_glowny] = max(podmacierz(:));
-        [ind_wiersz, ind_kolumna] = ind2sub(size(podmacierz), ind_glowny);
-        wspolczynniki([i,ind_wiersz+i-1],:) = wspolczynniki([ind_wiersz+i-1,i],:);
-        pierwotne_wspolczynniki([i,ind_wiersz+i-1],:) = pierwotne_wspolczynniki([i,ind_wiersz+i-1],:);
-        rozw([i,ind_wiersz+i-1],:) = rozw([ind_wiersz+i-1,i],:);
-        pierwotne_b([i,ind_kolumna+i-1], :) = pierwotne_b([i,ind_kolumna+i-1], :);
-        wspolczynniki(:,[i,ind_kolumna+i-1]) = wspolczynniki(:,[ind_kolumna+i-1,i]);
-        pierwotne_wspolczynniki(:,[i,ind_kolumna+i-1]) = pierwotne_wspolczynniki(:,[ind_kolumna+i-1,i]);
-        a = wspolczynniki(i,i);
-        for l = (i+1):rozmiar
-            wspolczynniki(l,i) = wspolczynniki(l,i) / a;
-            wspolczynniki(l, (i+1):end) = wspolczynniki(l, (i+1):end) - wspolczynniki(l,i) * wspolczynniki(i, (i+1):end);
-            rozw(l) = rozw(l) - wspolczynniki(l,i) * rozw(i);
-        end
-    end
-    
-    % U * x = rozw -> wyznaczenie x
-    for i = (rozmiar:-1:1)
-        % Ax=b; -> odejmowanie wartosci znanych ze strony rozwiazan
-        for j = (i+1):(rozmiar)
-            rozw(i) = rozw(i) - wspolczynniki((i),(j))*wspolczynniki((j),(j));
-        end
-        wspolczynniki(i,i) = rozw(i)/wspolczynniki(i,i);
-    end
-    
-    %przepisanie rozwiazan do macierzy rozw
-    for i = (1:rozmiar)
-        rozw(i) = wspolczynniki(i,i);
-    end
 end
