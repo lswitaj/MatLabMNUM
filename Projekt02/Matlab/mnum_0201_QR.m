@@ -11,12 +11,12 @@ clear;
 % end
 A = [1 1;2 -1; -2 4];
 %A = [1 1 2; -1 -2 4];
-A = macierz_niesymetryczna(5);
+A = macierz_symetryczna(20);
 A
-[q r] = qr_rozklad(A)
-[Q R] = qr(A)
-%eig(A)
-%qr_bezprzesuniec(A)
+% [q r] = qr_rozklad(A)
+% [Q R] = qr(A)
+eig(A)
+[A i] = qr_bezprzesuniec(A)
 %% 
 % wyswietlenie bledow
 
@@ -24,7 +24,7 @@ A
 %% 
 % *funkcje pomocnicze*
 % 
-% rozklad QR dla macierzy niekwadratowych
+% rozklad QR
 
 function [Q R] = qr_rozklad(A)
      [r_wiersze r_kolumny] = size(A);
@@ -63,10 +63,12 @@ end
 %% 
 % algorytm obliczania wartosci wlasnych metoda QR bez przesuniec
 
-function A = qr_bezprzesuniec(A)
-    while tolerancja(A) > 0.00001
+function [A i] = qr_bezprzesuniec(A)
+    i = 0;
+    while tolerancja(A) > 0.00001 & i < 1000
         [Q R] = qr_rozklad(A);
         A = R * Q;
+        i = i+1;
     end
     A = wektor(A);
 end
@@ -75,6 +77,18 @@ end
 
 function qrp = qr_przesuniecia(A)
     qrp = 0;
+end
+%% 
+% wyznaczanie wiekszego pierw f. kwadratowej
+
+function [x1 x2] = pierw_f_kwadratowej(a,b,c)
+    x1 = (-b + sqrt(b*b - 4*a*c))/(2*a);
+    x2 = (-b - sqrt(b*b - 4*a*c))/(2*a);
+    if abs(x2) > abs(x1)
+        x1 = x2;
+    end
+   %drugi pierwiastek ze wzorów Viete'a
+    x2 = ((-b)/a) - x1;
 end
 %% 
 % autorska implementacja matlabowej funkcji dot()
