@@ -11,13 +11,13 @@ clear;
 % end
 A = [1 1;2 -1; -2 4];
 %A = [1 1 2; -1 -2 4];
-A = macierz_symetryczna(4);
+A = macierz_symetryczna(5);
 A
 % [q r] = qr_rozklad(A)
 % [Q R] = qr(A)
 eig(A)
-[A i] = qr_bezprzesuniec(A)
-[A i] = qr_przesuniecia(A)
+[B i] = qr_bezprzesuniec(A)
+[B i] = qr_przesuniecia(A)
 %% 
 % wyswietlenie bledow
 
@@ -77,14 +77,15 @@ end
 %  algorytm obliczania wartosci wlasnych metoda QR z przesunieciami
 
 function [wart_wlasne i] = qr_przesuniecia(A)
-    rozmiar = size(A);
+    rozmiar = size(A,1);
     i = 0;
     wart_wlasne = zeros(rozmiar);
     wart_wlasne = wart_wlasne(:,1);
     for j = rozmiar:-1:2
-        while tolerancja(A) > 0.00001 & i < 1000+1
-            mala_macierz = A(k-1:k,k-1:k);                                    % macierz 2x2,
-            przesuniecie = blizsza_liczba(pierw_f_kwadratowej(mala_macierz)); % z ktorej wyznaczana jest najlepsza wart. wlasna
+        while max(abs(A(j,1:j-1))) > 0.00001 & i < 1000+1
+            mala_macierz = A(j-1:j,j-1:j);                                    % macierz 2x2,
+            [x1 x2] = pierw_f_kwadratowej(mala_macierz);
+            przesuniecie = blizsza_liczba(mala_macierz(2,2), x1, x2); % z ktorej wyznaczana jest najlepsza wart. wlasna
             A = A - eye(j)*przesuniecie;
             [Q R] = qr_rozklad(A);
             A = R * Q + eye(j)*przesuniecie;
@@ -94,10 +95,9 @@ function [wart_wlasne i] = qr_przesuniecia(A)
         if j > 2
             A = A(1:j-1,1:j-1);             %deflacja
         else
-            wart_wlasne(j) = A(1,1);
+            wart_wlasne(1) = A(1,1);
         end
     end
-    wart_wlasne;
 end
 %% 
 % wyznaczanie pierw f. kwadratowej
@@ -119,7 +119,7 @@ end
 % wybor pierwiastka blizszego d(n,n)
 
 function x = blizsza_liczba(wlasciwa, x1, x2)
-    if abs(wlasciwa-x1) < abs(wlasciwa-x1)
+    if abs(wlasciwa-x1) < abs(wlasciwa-x2)
         x = x1;
     else
         x = x2;
@@ -160,8 +160,6 @@ function tol = tolerancja(A)
                 tol = max(A(i,1:i-1));
             end
         end
-    elseif rozmiar == 2
-        tol = max([A(1,2) A(2,1)]);
     else
         tol = 0;
     end
