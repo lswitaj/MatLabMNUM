@@ -3,22 +3,27 @@
 
 clc;
 clear;
-
 dane = [-5 -5.4606;-4 -3.8804;-3 -1.9699;-2 -1.6666;-1 -0.0764;0 -0.3971;1 -1.0303;2 -4.5483;3 -11.528;4 -21.6417;5 -34.4458];
-
-funkcja = uklad_rownan_normalnych(dane, 10)
 x = linspace(-5,5,100);
-y = fun(funkcja, x);
+max_stopien = 8;
 
-funkcja2 = uklad_qr(dane, 10)
-y2 = fun(funkcja2, x);
+norma_res = zeros(max_stopien);
+norma_res = norma_res(:,1:2);
 
-plot(dane(:,1),dane(:,2),'bo', x, y, 'r', x, y2, 'g--')
-%A
-%% 
-% wyswietlenie bledow
+for stopien = 0:max_stopien
+    figure
+    funkcja = uklad_rownan_normalnych(dane, stopien);
+    y = fun(funkcja, x);
+    funkcja2 = uklad_qr(dane, stopien);
+    y2 = fun(funkcja2, x);
+    plot(dane(:,1),dane(:,2),'bo', x, y, 'r', x, y2, 'g--');
+    legend({'dane','met. rownan normalnych','met. rozkladu QR'},'Location','southwest');
+    title(['stopien wielomianu ' num2str(stopien)]);
+    norma_res(stopien+1,1) = norm(dane(:,2) - fun(funkcja, dane(:,1)));
+    norma_res(stopien+1,2) = norm(dane(:,2) - fun(funkcja2, dane(:,1)));
+end
 
-% blad_res_a
+norma_res
 %% 
 % *funkcje pomocnicze*
 % 
@@ -85,6 +90,10 @@ end
 
 function y = fun(funkcja, x)
     [temp rozmiar_x] = size(x);
+    if rozmiar_x == 1
+        x = x';
+        rozmiar_x = temp;
+    end
     st_wielomianu = size(funkcja);
     y = zeros(rozmiar_x);
     y = y(:,1);
@@ -148,42 +157,6 @@ function w = wektor(A)
     for i = 1:rozmiar
         w(i,1) = A(i,i);
     end
-end
-%% 
-% sprawdzenie tolerancji
-
-function tol = tolerancja(A)
-    rozmiar = size(A);
-    A = abs(A);
-    tol = 0;
-    for i = 1:rozmiar
-        if max(A(i,i+1:end)) > tol
-            tol = max(A(i,i+1:end));
-        end
-        if max(A(i,1:i-1)) > tol
-            tol = max(A(i,1:i-1));
-        end
-    end
-end
-%% 
-% tworzenie macierzy symetrycznej o zadanym rozmiarze
-
-function mac_sym = macierz_symetryczna(rozmiar)
-    mac_sym = randi([0 50],rozmiar,rozmiar);
-    mac_sym = mac_sym + mac_sym';
-end
-%% 
-% tworzenie macierzy niesymetrycznej o zadanym rozmiarze
-
-function mac_nsym = macierz_niesymetryczna(rozmiar)
-    mac_nsym = randi([0 100],rozmiar,rozmiar);
-end
-%% 
-% norma residuum
-
-function nr = norma_residuum(wspolczynniki, x, rozw)
-    residuum = wspolczynniki*x - rozw;
-    nr = norm(residuum);
 end
 %% 
 % 
