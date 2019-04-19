@@ -25,54 +25,46 @@
 %% 
 % statystyki i czyszczenie danych
 
-[wart indx] = max(cond_sym(:,5))
-    
 % for rozmiar = [5 10 20]
-%     
-%     iteracje_sym_bezprzes(:,rozmiar);
-%     iteracje_sym_przes(:,rozmiar);
-%     cond_sym(:,rozmiar);
-%     
-%     iteracje_niesym_przes(:,rozmiar);
-%     cond_niesym(:,rozmiar);
+%     rozmiar
+%     sr_sym_bezprzes = iteracje_sym_bezprzes(:,rozmiar)
+%     sr_sym_przes = iteracje_sym_przes(:,rozmiar)
+%     sr_niesym_przes = iteracje_niesym_przes(:,rozmiar)
+%     for i = 1:3
+%         [wart indx] = max(cond_sym(:,rozmiar));
+%         iteracje_sym_bezprzes(indx,rozmiar) = 0;
+%         iteracje_sym_przes(indx,rozmiar) = 0;
+%         cond_sym(indx,rozmiar) = 0;
+%         
+%         [wart indx] = max(cond_niesym(:,rozmiar));
+%         iteracje_niesym_przes(indx,rozmiar) = 0;
+%         cond_niesym(indx,rozmiar) = 0;
+%     end
 % end
+
+for rozmiar = [5 10 20]
+    rozmiar
+    sr_sym_bezprzes = mean(iteracje_sym_bezprzes(:,rozmiar))
+    sr_sym_przes = mean(iteracje_sym_przes(:,rozmiar))
+    sr_niesym_przes = mean(iteracje_niesym_przes(:,rozmiar))
+end
 %% 
 % wykresy
 
-plot(cond_sym(:,5),iteracje_sym_bezprzes(:,5),'bo', cond_sym(:,5), iteracje_sym_przes(:,5), 'r*');
-title('Zaleznosc uwarunkowania od ilosci iteracji mac symetryczna o rozmiarze 5')
-plot(cond_niesym(:,5),iteracje_niesym_przes(:,5),'go');
-title('Zaleznosc uwarunkowania od ilosci iteracji mac niesymetryczna 5')
-
-plot(cond_sym(:,10),iteracje_sym_bezprzes(:,10),'bo', cond_sym(:,10), iteracje_sym_przes(:,10), 'r*');
-title('Zaleznosc uwarunkowania od ilosci iteracji mac symetryczna o rozmiarze 10')
-plot(cond_niesym(:,5),iteracje_niesym_przes(:,10),'go');
-title('Zaleznosc uwarunkowania od ilosci iteracji mac niesymetryczna 10')
-
-plot(cond_sym(:,20),iteracje_sym_bezprzes(:,20),'bo', cond_sym(:,20), iteracje_sym_przes(:,20), 'r*');
-title('Zaleznosc uwarunkowania od ilosci iteracji mac symetryczna o rozmiarze 20')
-plot(cond_niesym(:,20),iteracje_niesym_przes(:,20),'go');
-title('Zaleznosc uwarunkowania od ilosci iteracji mac niesymetryczna 20')
-% eig(A)
-%
-% plot(blad_res_a(:,2),blad_res_a(:,1));
-% title('Zaleznosc wartosci bledu od ilosci rownan w ukladzie (typ A)')
-% xlabel('ilosc rownan') 
-% ylabel('norma residuum *10^-12')
-% 
-% plot(blad_res_b(:,2),blad_res_b(:,1));
-% title('Zaleznosc wartosci bledu od ilosci rownan w ukladzie (typ B)')
-% xlabel('ilosc rownan') 
-% ylabel('norma residuum *10^-12')
-% 
-% plot(blad_res_c(:,2),blad_res_c(:,1));
-% title('Zaleznosc wartosci bledu od ilosci rownan w ukladzie (typ C)')
-% xlabel('ilosc rownan') 
-% ylabel('norma residuum')
-%% 
-% wyswietlenie bledow
-
-% blad_res_a
+for rozmiar = [5 10 20]
+    figure
+    plot(cond_sym(:,rozmiar),iteracje_sym_bezprzes(:,rozmiar),'bo', cond_sym(:,rozmiar), iteracje_sym_przes(:,rozmiar), 'r*');
+    title(['Macierz symetryczna o rozmiarze ' num2str(rozmiar)])
+    xlabel('wskaznik uwarunkowania') 
+    ylabel('ilosc potrzebnych iteracji')
+    legend({'bez przesuniec','z przesunieciami'},'Location','northeast');
+    figure
+    plot(cond_niesym(:,rozmiar),iteracje_niesym_przes(:,rozmiar),'go');
+    title(['Macierz niesymetryczna o rozmiarze ' num2str(rozmiar)])
+    xlabel('wskaznik uwarunkowania') 
+    ylabel('ilosc potrzebnych iteracji')
+    legend({'z przesunieciami'},'Location','northeast');
+end
 %% 
 % *funkcje pomocnicze*
 % 
@@ -134,7 +126,7 @@ function [wart_wlasne i] = qr_przesuniecia(A)
     wart_wlasne = wart_wlasne(:,1);
     for j = rozmiar:-1:2
         while max(abs(A(j,1:j-1))) > 0.00001 & i < 200+1
-            mala_macierz = A(j-1:j,j-1:j);                                    % macierz 2x2,
+            mala_macierz = A(j-1:j,j-1:j);                            % macierz 2x2,
             [x1 x2] = pierw_f_kwadratowej(mala_macierz);
             przesuniecie = blizsza_liczba(mala_macierz(2,2), x1, x2); % z ktorej wyznaczana jest najlepsza wart. wlasna
             A = A - eye(j)*przesuniecie;
