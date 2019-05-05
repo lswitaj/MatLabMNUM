@@ -55,7 +55,15 @@ end
 %% 
 % metoda bisekcji
 
-bisekcja(przedzialy)
+x_bisekcja = bisekcja(przedzialy);
+x_bisekcja
+y_bisekcja = wartosc_funkcji(x_bisekcja)
+fprintf('najwiekszy blad zera przy metodzie bisekcji %f\n', najwieksze_zero(x_bisekcja));
+
+figure
+plot(x,y,'b-',[0 15], [0 0], 'k--', x_bisekcja, wartosc_funkcji(x_bisekcja), 'go');
+legend({'f(x)', 'y=0', 'm. zerowe met. bisekcji'},'Location','southwest');
+title('wykres funkcji f(x)=2,3*sin(x)+4*ln(x+2)-11');
 %% 
 % *funkcje pomocnicze glowne*
 % 
@@ -65,12 +73,10 @@ function x = bisekcja(przedzialy)
     ilosc_pierwiastkow = size(przedzialy,1);
     x = zeros(ilosc_pierwiastkow);
     x = wektor(x);
-    
     for i = 1:ilosc_pierwiastkow
         c = 0;
-        while (wartosc_funkcji(c)<0.0001 & (przedzialy(i,2)-przedzialy(i,1)) < 0.01)
+        while (abs(wartosc_funkcji(c))>0.000001 | (przedzialy(i,2)-przedzialy(i,1))>0.01)
             [c przedzialy(i,:)] = polowienie_przedzialu(przedzialy(i,:));
-            c
         end
         x(i) = c;
     end
@@ -93,6 +99,10 @@ end
 
 function y = wartosc_funkcji(x)
     [temp rozmiar_x] = size(x);
+    if rozmiar_x == 1
+        x = x';
+        rozmiar_x = temp;
+    end
     y = zeros(rozmiar_x);
     y = y(:,1);
     for i = 1:rozmiar_x
@@ -110,10 +120,10 @@ function result = sprawdzenie_przedzialu(przedzial)
     end
 end
 %% 
-% wyznaczenie wartosci zer na podstawie miejsc zerowych
+% wartosc najwiekszego bledu
 
-function y = tol(x)
-    y = max(abs(fun(x)));
+function y = najwieksze_zero(x)
+    y = max(abs(wartosc_funkcji(x)));
 end
 %% 
 % funkcja wektoryzujaca macierz diagonalna
