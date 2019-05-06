@@ -1,3 +1,5 @@
+%todo dodac ograniczenie na ilosc iteracji
+
 % usuwanie wartosci skrajnych
 %   [wart indx] = max(cond_sym(:,rozmiar));
 %   iteracje_sym_bezprzes(indx,rozmiar) = 0;
@@ -46,7 +48,7 @@ title('wykres funkcji f(x)=2,3*sin(x)+4*ln(x+2)-11');
 %% 
 % przedzialy poczatkowe
 
-przedzialy = [0 8; 8 10; 10 15];
+    przedzialy = [1 8; 8 10; 10 15];
 
 for i=1:3
     %wybor i-tego przedzialu
@@ -65,17 +67,32 @@ plot(x,y,'b-',[0 15], [0 0], 'k--', x_bisekcja, wartosc_funkcji(x_bisekcja), 'go
 legend({'f(x)', 'y=0', 'm. zerowe met. bisekcji'},'Location','southwest');
 title('wykres funkcji f(x)=2,3*sin(x)+4*ln(x+2)-11');
 %% 
+% metoda siecznych
+
+x_sieczne = met_siecznych(przedzialy);
+x_sieczne
+y_sieczne = wartosc_funkcji(x_sieczne)
+fprintf('najwiekszy blad zera przy metodzie siecznych %f\n', najwieksze_zero(x_sieczne));
+
+figure
+plot(x,y,'b-',[0 15], [0 0], 'k--', x_sieczne, wartosc_funkcji(x_sieczne), 'go');
+legend({'f(x)', 'y=0', 'm. zerowe met. siecznych'},'Location','southwest');
+title('wykres funkcji f(x)=2,3*sin(x)+4*ln(x+2)-11');
+%% 
 % *funkcje pomocnicze glowne*
 % 
 % metoda bisekcji
 
 function x = bisekcja(przedzialy)
+    dokladnosc_zer = 0.1;
+    wielkosc_przedzialu = 0.1;
+    
     ilosc_pierwiastkow = size(przedzialy,1);
     x = zeros(ilosc_pierwiastkow);
     x = wektor(x);
     for i = 1:ilosc_pierwiastkow
         c = 0;
-        while (abs(wartosc_funkcji(c))>0.000001 | (przedzialy(i,2)-przedzialy(i,1))>0.01)
+        while (abs(wartosc_funkcji(c))>dokladnosc_zer | (przedzialy(i,2)-przedzialy(i,1))>wielkosc_przedzialu)
             [c przedzialy(i,:)] = polowienie_przedzialu(przedzialy(i,:));
         end
         x(i) = c;
@@ -91,6 +108,46 @@ function [c nowy_przedzial] = polowienie_przedzialu(przedzial)
     else
         nowy_przedzial = [c przedzial(2)];
     end
+end
+%% 
+% metoda siecznych
+
+function x = met_siecznych(przedzialy)
+    dokladnosc_zer = 0.1;
+    wielkosc_przedzialu = 0.1;
+
+    ilosc_pierwiastkow = size(przedzialy,1);
+    x = zeros(ilosc_pierwiastkow);
+    x = wektor(x);
+    for i = 1:ilosc_pierwiastkow
+        c = 0;
+        while (abs(wartosc_funkcji(c))>dokladnosc_zer | (przedzialy(i,2)-przedzialy(i,1))>wielkosc_przedzialu)
+            [c przedzialy(i,:)] = nowy_sieczny_przedzial(przedzialy(i,:), c);
+        end
+        x(i) = c;
+    end
+end
+%% 
+% zmniejszenie przedzialow dla metody siecznych
+
+function [d nowy_przedzial] = nowy_sieczny_przedzial(przedzial, c)
+    d = wyznacz_zero_f_liniowej(przedzial);
+    if(przedzial(2) == c)
+        nowy_przedzial = [d przedzial(2)]; 
+    else
+        nowy_przedzial = [przedzial(1) d]; 
+    end
+end
+%% 
+% wyznaczenie zera f. liniowej wyznaczonej na podstawie punktow z koncow 
+% przedzialu na podstawie wyliczonego analitycznie wzoru
+
+function c = wyznacz_zero_f_liniowej(przedzial)
+    x1 = przedzial(1);
+    x2 = przedzial(2);
+    y1 = wartosc_funkcji(x1);
+    y2 = wartosc_funkcji(x2);
+    c = (x2*y1-x1*y2)/(y1-y2);
 end
 %% 
 % *funkcje pomocnicze dodatkowe*
