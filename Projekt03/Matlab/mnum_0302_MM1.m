@@ -6,14 +6,14 @@ clear;
 x = linspace(-1.5,3.5,100);
 
 %przedzialy = [6 8; 8.3 10; 12 15];
-dokladnosc_zer = 0.0001;
+dokladnosc_zer = 0.01;
 
 % m_zerowe = MM1(-2, -1, 0, dokladnosc_zer)
+% m_zerowe = MM1(-5, -4, -3, dokladnosc_zer)
 % m_zerowe'
 % abs(wartosc_funkcji(m_zerowe))
-
-m_zerowe = MM1(-5, -4, -3, dokladnosc_zer)
-abs(wartosc_funkcji(m_zerowe))
+% m_zerowe = MM1(2, 2.5, 3, dokladnosc_zer)
+% m_zerowe = MM1(-1.5, -1, -.075, dokladnosc_zer)
 
 figure
 y = wartosc_funkcji(x);
