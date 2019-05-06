@@ -1,24 +1,3 @@
-% usuwanie wartosci skrajnych
-%   [wart indx] = max(cond_sym(:,rozmiar));
-%   iteracje_sym_bezprzes(indx,rozmiar) = 0;
-
-% warunek stopu
-%   while tol(fun(x)) > 0.00001 & i < 200+1
-
-% % wyznaczanie pierw f. kwadratowej
-% function [x1 x2] = pierw_f_kwadratowej(mala_macierz)
-%     a = 1;
-%     b = -(mala_macierz(1,1)+mala_macierz(2,2));
-%     c = (mala_macierz(1,1)*mala_macierz(2,2))-(mala_macierz(2,1)*mala_macierz(1,2));
-%     
-%     x1 = (-b + sqrt(b*b - 4*a*c))/(2*a);
-%     x2 = (-b - sqrt(b*b - 4*a*c))/(2*a);
-%     if abs(x2) > abs(x1)
-%         x1 = x2;
-%     end
-%    %drugi pierwiastek ze wzorów Viete'a
-%     x2 = ((-b)/a) - x1;
-% end
 %% 
 % program
 
@@ -26,17 +5,36 @@ clc;
 clear;
 x = linspace(-1.5,3.5,100);
 
+%przedzialy = [6 8; 8.3 10; 12 15];
+dokladnosc_zer = 0.0001;
+
+% m_zerowe = MM1(-2, -1, 0, dokladnosc_zer)
+% m_zerowe'
+% abs(wartosc_funkcji(m_zerowe))
+
+m_zerowe = MM1(-5, -4, -3, dokladnosc_zer)
+abs(wartosc_funkcji(m_zerowe))
+
 figure
 y = wartosc_funkcji(x);
-plot(x,y,'b-',[-1.5 3.5], [0 0], 'k--');
+plot(x,y,'b-',[-1.5 3.5], [0 0], 'k--', m_zerowe, wartosc_funkcji(m_zerowe), 'r*');
 legend({'f(x)', 'y=0'},'Location','southwest');
 title('wykres funkcji f(x)=-x^4+2.5x^3+2.5*x^2+x+0.5');
-
-% wartosc_funkcji(-0.6)
-% wartosc_funkcji(3.35)
 %% 
 % *funkcje metody Mullera*
 % 
+% metoda MM1
+
+function x = MM1(x1, x2, x3, dokladnosc_zer)
+    ilosc_pierwiastkow = 1;
+    for i = 1:ilosc_pierwiastkow
+        while (abs(wartosc_funkcji(x3))>dokladnosc_zer)
+            [x1 x2 x3] = kolejny_punkt(x1,x2,x3);
+        end
+        x = x3;
+    end
+end
+%% 
 % wyznaczenie kolejnego punktu na podstawie paraboli
 
 function [x1 x2 x3] = kolejny_punkt(x1, x2, x3)
@@ -49,9 +47,9 @@ function [x1 x2 x3] = kolejny_punkt(x1, x2, x3)
     x2 = x3;
     
     if (b+sqrt(b^2-4*a*c)) > (b-sqrt(b^2-4*a*c))
-        x3 = x2 - (x2-x1)*(2c/(b+sqrt(b^2-4*a*c)));
+        x3 = x2 - (x2-x1)*(2*c/(b+sqrt(b^2-4*a*c)));
     else
-        x3 = x2 - (x2-x1)*(2c/(b-sqrt(b^2-4*a*c)));
+        x3 = x2 - (x2-x1)*(2*c/(b-sqrt(b^2-4*a*c)));
     end
 end
 %% 
