@@ -20,37 +20,76 @@
 %     x2 = ((-b)/a) - x1;
 % end
 %% 
-% 
-% 
 % program
 
 clc;
 clear;
-x = linspace(0,15,100);
+x = linspace(-1.5,3.5,100);
 
 figure
-y = fun(x);
-plot(x,y,'b-',[0 15], [0 0], 'k--');
+y = wartosc_funkcji(x);
+plot(x,y,'b-',[-1.5 3.5], [0 0], 'k--');
 legend({'f(x)', 'y=0'},'Location','southwest');
-title('wykres funkcji f(x)=2,3*sin(x)+4*ln(x+2)-11');
-%% 
-% *funkcje pomocnicze*
-% 
-% wyznaczenie wyjsc dla podanych x-ow i zadanej funkcji
+title('wykres funkcji f(x)=-x^4+2.5x^3+2.5*x^2+x+0.5');
 
-function y = fun(x)
-    [temp rozmiar_x] = size(x);
-    y = zeros(rozmiar_x);
-    y = y(:,1);
-    for i = 1:rozmiar_x
-        y(i,1) = 2.3*sin(x(1,i))+4*log(x(1,i)+2)-11;
+% wartosc_funkcji(-0.6)
+% wartosc_funkcji(3.35)
+%% 
+% *funkcje metody Mullera*
+% 
+% wyznaczenie kolejnego punktu na podstawie paraboli
+
+function [x1 x2 x3] = kolejny_punkt(x1, x2, x3)
+    q = (x3-x2)/(x2-x1);
+    a = q*wartosc_funkcji(x3) - q*(q+1)*wartosc_funkcji(x2) + q^2*wartosc_funkcji(x1);
+    b = (2*q+1)*wartosc_funkcji(x3) - (q+1)^2*wartosc_funkcji(x2) + q^2*wartosc_funkcji(x1);
+    c = (q+1)*wartosc_funkcji(x3);
+    
+    x1 = x2;
+    x2 = x3;
+    
+    if (b+sqrt(b^2-4*a*c)) > (b-sqrt(b^2-4*a*c))
+        x3 = x2 - (x2-x1)*(2c/(b+sqrt(b^2-4*a*c)));
+    else
+        x3 = x2 - (x2-x1)*(2c/(b-sqrt(b^2-4*a*c)));
     end
 end
 %% 
-% wyznaczenie wartosci zer na podstawie miejsc zerowych
+% *funkcje pomocnicze dodatkowe*
+% 
+% wyznaczenie wyjsc dla podanych x-ow i zadanej funkcji
 
-function y = tol(x)
-    y = max(abs(fun(x)));
+function y = wartosc_funkcji(x)
+    wielomian = [0.5 1 2.5 2.5 -1];
+    rozmiar_w = size(wielomian,2);
+    [temp rozmiar_x] = size(x);
+    if rozmiar_x == 1
+        x = x';
+        rozmiar_x = temp;
+    end
+    y = zeros(rozmiar_x);
+    y = y(:,1);
+    for i = 1:rozmiar_x
+        for j = 1:rozmiar_w
+            y(i,1) = y(i,1) + wielomian(j)*(x(1,i))^(j-1);
+        end
+    end
+end
+%% 
+% sprawdzenie czy w podanym przedziale jest miejsce zerowe
+
+function result = sprawdzenie_przedzialu(przedzial)
+    if wartosc_funkcji(przedzial(1))*wartosc_funkcji(przedzial(2)) < 0
+        result = 1;
+    else
+        result = 0;
+    end
+end
+%% 
+% wartosc najwiekszego bledu
+
+function y = najwieksze_zero(x)
+    y = max(abs(wartosc_funkcji(x)));
 end
 %% 
 % funkcja wektoryzujaca macierz diagonalna
@@ -64,6 +103,11 @@ end
 %% 
 % 
 % 
-% <https://www.matemaks.pl/program-do-rysowania-wykresow-funkcji.html https://www.matemaks.pl/program-do-rysowania-wykresow-funkcji.html>
+% * <https://www.wolframalpha.com/input/?i=-x%5E4%2B2.5x%5E3%2B2.5*x%5E2%2Bx%2B0.5 
+% https://www.wolframalpha.com/input/?i=-x%5E4%2B2.5x%5E3%2B2.5*x%5E2%2Bx%2B0.5>
 % 
-% 2,3*sin(x)+4*log(x+2)-11
+% 
+% 
+% # wzor na kolejnego x: <https://www.youtube.com/watch?v=XIIEjwtkONc https://www.youtube.com/watch?v=XIIEjwtkONc>
+% 
+%
