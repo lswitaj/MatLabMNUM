@@ -1,23 +1,3 @@
-%todo dodac ograniczenie na ilosc iteracji
-
-% usuwanie wartosci skrajnych
-%   [wart indx] = max(cond_sym(:,rozmiar));
-%   iteracje_sym_bezprzes(indx,rozmiar) = 0;
-
-% % wyznaczanie pierw f. kwadratowej
-% function [x1 x2] = pierw_f_kwadratowej(mala_macierz)
-%     a = 1;
-%     b = -(mala_macierz(1,1)+mala_macierz(2,2));
-%     c = (mala_macierz(1,1)*mala_macierz(2,2))-(mala_macierz(2,1)*mala_macierz(1,2));
-%     
-%     x1 = (-b + sqrt(b*b - 4*a*c))/(2*a);
-%     x2 = (-b - sqrt(b*b - 4*a*c))/(2*a);
-%     if abs(x2) > abs(x1)
-%         x1 = x2;
-%     end
-%    %drugi pierwiastek ze wzorów Viete'a
-%     x2 = ((-b)/a) - x1;
-% end
 %% 
 % start
 
@@ -30,19 +10,21 @@ x = linspace(0,15,100);
 przedzialy = [6 8; 8.3 10; 12 15];
 
 dokladnosc_zer = 0.001;
-wielkosc_przedzialu = 0.001;
+wielkosc_przedzialu = 0.01;
+ilosc_iteracji = 100;
 
 for i=1:3
     %wybor i-tego przedzialu
-    sprawdzenie_przedzialu(przedzialy(i,:));
+    if sprawdzenie_przedzialu(przedzialy(i,:)) == 0
+        error('Error, zostaly wybrane zle przedzialy');
+    end
 end
 %% 
 % wykres
 
 figure
 y = wartosc_funkcji(x);
-y2 = wartosc_funkcji(przedzialy);
-plot(x,y,'b-',[0 15], [0 0], 'k--');
+plot(x,y,'b-',[0 15], [0 0], 'k--', przedzialy(1,:), wartosc_funkcji(przedzialy(1,:)), 'r*', przedzialy(2,:), wartosc_funkcji(przedzialy(2,:)), 'c*', przedzialy(3,:), wartosc_funkcji(przedzialy(3,:)), 'k*');
 legend({'f(x)', 'y=0'},'Location','southwest');
 title('wykres funkcji f(x)=2,3*sin(x)+4*ln(x+2)-11');
 %% 
@@ -56,29 +38,25 @@ title('wykres funkcji f(x)=2,3*sin(x)+4*ln(x+2)-11');
 %% 
 % porownanie
 
-x_bisekcja = bisekcja(przedzialy, dokladnosc_zer, wielkosc_przedzialu)
-x_sieczne = met_siecznych(przedzialy, dokladnosc_zer, wielkosc_przedzialu)
-x_styczne = met_stycznych(przedzialy, dokladnosc_zer, wielkosc_przedzialu)
-y_bisekcja = wartosc_funkcji(x_bisekcja)
-y_sieczne = wartosc_funkcji(x_sieczne)
-y_styczne = wartosc_funkcji(x_styczne)
-
-fprintf('najwiekszy blad zera przy metodzie bisekcji %f\n', najwieksze_zero(x_bisekcja));
-fprintf('najwiekszy blad zera przy metodzie siecznych %f\n', najwieksze_zero(x_sieczne));
-fprintf('najwiekszy blad zera przy metodzie stycznych %f\n', najwieksze_zero(x_styczne));
-
-figure
-plot(x,y,'b-',[0 15], [0 0], 'k--', x_bisekcja, wartosc_funkcji(x_bisekcja), 'go');
-legend({'f(x)', 'y=0', 'm. zerowe met. bisekcji'},'Location','southwest');
-title('wykres funkcji f(x)=2,3*sin(x)+4*ln(x+2)-11');
-
-plot(x,y,'b-',[0 15], [0 0], 'k--', x_sieczne, wartosc_funkcji(x_sieczne), 'go');
-legend({'f(x)', 'y=0', 'm. zerowe met. siecznych'},'Location','southwest');
-title('wykres funkcji f(x)=2,3*sin(x)+4*ln(x+2)-11');
-
-plot(x,y,'b-',[0 15], [0 0], 'k--', x_styczne, wartosc_funkcji(x_styczne), 'go');
-legend({'f(x)', 'y=0', 'm. zerowe met. stycznych'},'Location','southwest');
-title('wykres funkcji f(x)=2,3*sin(x)+4*ln(x+2)-11');
+% x_bisekcja = bisekcja(przedzialy, dokladnosc_zer, wielkosc_przedzialu)
+% x_sieczne = met_siecznych(przedzialy, dokladnosc_zer, wielkosc_przedzialu)
+% x_styczne = met_stycznych(przedzialy, dokladnosc_zer, ilosc_iteracji)
+% y_bisekcja = wartosc_funkcji(x_bisekcja)
+% y_sieczne = wartosc_funkcji(x_sieczne)
+% y_styczne = wartosc_funkcji(x_styczne)
+% 
+% figure
+% plot(x,y,'b-',[0 15], [0 0], 'k--', x_bisekcja, wartosc_funkcji(x_bisekcja), 'go');
+% legend({'f(x)', 'y=0', 'm. zerowe met. bisekcji'},'Location','southwest');
+% title('wykres funkcji f(x)=2,3*sin(x)+4*ln(x+2)-11');
+% 
+% plot(x,y,'b-',[0 15], [0 0], 'k--', x_sieczne, wartosc_funkcji(x_sieczne), 'go');
+% legend({'f(x)', 'y=0', 'm. zerowe met. siecznych'},'Location','southwest');
+% title('wykres funkcji f(x)=2,3*sin(x)+4*ln(x+2)-11');
+% 
+% plot(x,y,'b-',[0 15], [0 0], 'k--', x_styczne, wartosc_funkcji(x_styczne), 'go');
+% legend({'f(x)', 'y=0', 'm. zerowe met. stycznych'},'Location','southwest');
+% title('wykres funkcji f(x)=2,3*sin(x)+4*ln(x+2)-11');
 %% 
 % *funkcje pomocnicze glowne*
 % 
@@ -89,9 +67,13 @@ function x = bisekcja(przedzialy, dokladnosc_zer, wielkosc_przedzialu)
     x = zeros(ilosc_pierwiastkow);
     x = wektor(x);
     for i = 1:ilosc_pierwiastkow
+        fprintf('metoda bisekcji przedzial nr %d\n', i);
+        iteracje = 0;
         c = 0;
         while (abs(wartosc_funkcji(c))>dokladnosc_zer | (przedzialy(i,2)-przedzialy(i,1))>wielkosc_przedzialu)
+            iteracje = iteracje + 1;
             [c przedzialy(i,:)] = polowienie_przedzialu(przedzialy(i,:));
+            fprintf('x=%f y=%f\n', c, wartosc_funkcji(c));
         end
         x(i) = c;
     end
@@ -115,9 +97,11 @@ function x = met_siecznych(przedzialy, dokladnosc_zer, wielkosc_przedzialu)
     x = zeros(ilosc_pierwiastkow);
     x = wektor(x);
     for i = 1:ilosc_pierwiastkow
+        fprintf('metoda siecznych przedzial nr %d\n', i);
         c = 0;
         while (abs(wartosc_funkcji(c))>dokladnosc_zer | (przedzialy(i,2)-przedzialy(i,1))>wielkosc_przedzialu)
             [c przedzialy(i,:)] = nowy_sieczny_przedzial(przedzialy(i,:), c);
+            fprintf('x=%f y=%f\n', c, wartosc_funkcji(c));
         end
         x(i) = c;
     end
@@ -147,15 +131,17 @@ end
 %% 
 % *3. metoda stycznych*
 
-function x = met_stycznych(przedzialy, dokladnosc_zer, wielkosc_przedzialu)
+function x = met_stycznych(przedzialy, dokladnosc_zer, ilosc_iteracji)
     ilosc_pierwiastkow = size(przedzialy,1);
     x = zeros(ilosc_pierwiastkow);
     x = wektor(x);
     for i = 1:ilosc_pierwiastkow
+        fprintf('metoda stycznych przedzial nr %d\n', i);
         c = 0;
         pierwotny_przedzial = przedzialy(i,:);
         while (abs(wartosc_funkcji(c))>dokladnosc_zer)
             [c przedzialy(i,:)] = nowy_przedzial_sieczny(przedzialy(i,:), pierwotny_przedzial);
+            fprintf('x=%f y=%f\n', c, wartosc_funkcji(c));
         end
         x(i) = c;
     end
@@ -170,7 +156,7 @@ function [d nowy_przedzial] = nowy_przedzial_sieczny(przedzial, pierwotny_przedz
     else
         disp(przedzial);
         disp(d);
-        error('Error. \nPunkt poza przedzialem');
+        error('Error. Punkt poza przedzialem');
     end
 end
 %% 
@@ -230,11 +216,3 @@ function w = wektor(A)
         w(i,1) = A(i,i);
     end
 end
-%% 
-% 
-% 
-% <https://www.matemaks.pl/program-do-rysowania-wykresow-funkcji.html https://www.matemaks.pl/program-do-rysowania-wykresow-funkcji.html>
-% 
-% 2,3*sin(x)+4*log(x+2)-11
-% 
-%
