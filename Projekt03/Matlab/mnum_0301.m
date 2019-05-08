@@ -38,6 +38,7 @@ title('wykres funkcji f(x)=2,3*sin(x)+4*ln(x+2)-11');
 %% 
 % porownanie
 
+x_styczne = met_stycznych([0 8], dokladnosc_zer, ilosc_iteracji)
 % x_bisekcja = bisekcja(przedzialy, dokladnosc_zer, wielkosc_przedzialu)
 % x_sieczne = met_siecznych(przedzialy, dokladnosc_zer, wielkosc_przedzialu)
 % x_styczne = met_stycznych(przedzialy, dokladnosc_zer, ilosc_iteracji)
@@ -137,10 +138,12 @@ function x = met_stycznych(przedzialy, dokladnosc_zer, ilosc_iteracji)
     x = wektor(x);
     for i = 1:ilosc_pierwiastkow
         fprintf('metoda stycznych przedzial nr %d\n', i);
+        iteracje = 0;
         c = 0;
         pierwotny_przedzial = przedzialy(i,:);
-        while (abs(wartosc_funkcji(c))>dokladnosc_zer)
-            [c przedzialy(i,:)] = nowy_przedzial_sieczny(przedzialy(i,:), pierwotny_przedzial);
+        while (abs(wartosc_funkcji(c))>dokladnosc_zer & iteracje < ilosc_iteracji)
+            iteracje = iteracje + 1;
+            [c przedzialy(i,:)] = nowy_przedzial_styczny(przedzialy(i,:), pierwotny_przedzial);
             fprintf('x=%f y=%f\n', c, wartosc_funkcji(c));
         end
         x(i) = c;
@@ -149,21 +152,21 @@ end
 %% 
 % zmniejszenie przedzialow dla metody stycznych
 
-function [d nowy_przedzial] = nowy_przedzial_sieczny(przedzial, pierwotny_przedzial)
-    d = nowy_punkt_sieczny(przedzial(1));
+function [d nowy_przedzial] = nowy_przedzial_styczny(przedzial, pierwotny_przedzial)
+    d = nowy_punkt_styczny(przedzial(1));
     if(d >= pierwotny_przedzial(1) & d <= pierwotny_przedzial(2))
         nowy_przedzial = [d przedzial(2)];
     else
         disp(przedzial);
         disp(d);
-        error('Error. Punkt poza przedzialem');
+        error('Error. Punkt poza przedzialem. Nalezy wybrac inny przedzial poczatkowy');
     end
 end
 %% 
 % wyznaczenie miejsca zerowego na podstawie pochodnej oraz poprzedniego 
 % punktu
 
-function x0 = nowy_punkt_sieczny(x)
+function x0 = nowy_punkt_styczny(x)
     m = wartosc_pochodnej(x);
     y = wartosc_funkcji(x);
     x0 = (m*x-y)/m;
